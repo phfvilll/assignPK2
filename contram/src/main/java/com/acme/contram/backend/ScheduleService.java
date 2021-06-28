@@ -27,6 +27,7 @@ public class ScheduleService {
     private final int pmTimeSpan = 240;
     private final String pmEndEventTitle = "Networking Event";
     private final LocalTime pmStartTime = LocalTime.of(13,00);
+    // final value is only known at the end of the scheduling process
     private LocalTime pmEndEventTime;
 
     public int parseProposals(String input) {
@@ -196,7 +197,6 @@ public class ScheduleService {
         outputList = new LinkedList<>();
 
         if(trackList.size()==0){
-            //outputList.add("");
             return outputList;
         }
 

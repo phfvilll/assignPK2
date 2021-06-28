@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -66,6 +67,12 @@ public class MainView extends VerticalLayout {
         button.getElement().getThemeList().add("primary");
         add(button);
 
+        Label label = new Label(" ");
+        label.getElement().getStyle().set("width","100%");
+        label.getElement().getStyle().set("font-size","large");
+        label.getElement().getStyle().set("font-weight","bold");
+        add(label);
+
         // Span to show the schedule
         Span outputSpan = new Span();
         outputSpan.getElement().getStyle().set("width","100%");
@@ -81,7 +88,7 @@ public class MainView extends VerticalLayout {
 
             // set up a notification message to inform the user about incorrect formatted proposals
             int countedErrors = scheduleService.parseProposals(inputArea.getValue());
-            String notificationMessage = "Created schedule for your conference with " + countedErrors;
+            String notificationMessage = " Reading proposals completed with " + countedErrors;
 
             if (countedErrors == 0) {
                 notificationMessage += " errors.";
@@ -96,7 +103,13 @@ public class MainView extends VerticalLayout {
             // ask for the created conference schedule as a List
             LinkedList<String> schedule = scheduleService.getOutputList();
 
-            String outputString = "<br>";
+            if(schedule.size()==0) {
+                label.setText("No talks to schedule.");
+            } else {
+                label.setText("Conference Schedule:");
+            }
+
+            String outputString = "";
             for(int i = 0; i < schedule.size(); i++){
                 outputString += schedule.get(i) + "<br>";
             }
