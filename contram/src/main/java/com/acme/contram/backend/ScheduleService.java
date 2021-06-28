@@ -1,51 +1,95 @@
 package com.acme.contram.backend;
 
 import com.acme.contram.backend.model.Talk;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.LinkedList;
 
 public class ScheduleService {
 
     private LinkedList<Talk> unplannedTalks;
 
-    public String parseProposals(String input) {
-        int errorTracker = 23;
+    public int parseProposals(String input) {
+
+        unplannedTalks = new LinkedList<Talk>();
+
+        // variable to count incorrect formatted proposals
+        int errorCounter = 0;
 
         // splitting the input String line per line by carriage return to get an array of all proposals
         String[] lines = input.split("\n");
 
+        // checking all proposals for the correct format and list the correct ones as talks
         for (int i = 0; i < lines.length;i++){
-            System.out.println(lines[i]);
             //handle one proposal
-            String[] proposalParts = lines[i].split(" ");
-            for (int j = 0; j < proposalParts.length;j++) {
-                System.out.println(proposalParts[j]);
+            if(!checkProposal(lines[i])){
+                errorCounter++;
+                System.out.println("Error found");
             }
-            if(proposalParts[proposalParts.length-1].equals("lightning")){
-                errorTracker = 0;
-                System.out.println("HelloWorld");
-
-                String talkTitle = "";
-                for(int j = 0; j < proposalParts.length-1; j++){
-                    talkTitle += proposalParts[j];
-                }
-                // 5, because a lightning lasts 5 minutes
-                unplannedTalks.add(new Talk(talkTitle,5));
-            } else {
-
-            }
-
         }
 
+        // schedule the listed talks
         scheduleTalks();
 
-        String errorMessage = "Please check the format of your proposals and try again.";
-        if (errorTracker == 0) {
-            return "0 errors.";
-        } else if (errorTracker == 1) {
-            return "1 error." + errorMessage;
-        } else {
-            return errorTracker+" errors. " + errorMessage;
+        return errorCounter;
+    }
+
+    private boolean checkProposal(String proposal) {
+
+        // splitting the proposal to search the last element for duration
+        String[] proposalParts = proposal.split(" ");
+
+        // ignore proposals without talk title
+        if(proposalParts.length<=1){
+            System.out.println("too short");
+            // skip empty lines
+            if(proposalParts.length==0 || proposalParts[0] == ""){
+
+                System.out.println("zero short");
+                return true;
+            }
+            return false;
         }
+
+        for (int j = 0; j < proposalParts.length;j++) {
+            System.out.println(proposalParts[j]);
+        }
+
+        if(proposalParts[proposalParts.length-1].equals("lightning")){
+            System.out.println("HelloWorld");
+
+            String talkTitle = "";
+            for(int j = 0; j < proposalParts.length-1; j++){
+                talkTitle += proposalParts[j];
+            }
+            // 5, because a lightning lasts 5 minutes
+            unplannedTalks.add(new Talk(talkTitle,5));
+            System.out.println("new Talk :) .Now we have "+unplannedTalks.size());
+
+            return true;
+        } else {
+            String[] lastElement = proposalParts[proposalParts.length-1].split("min");
+
+            for (int j = 0; j < lastElement.length;j++) {
+                System.out.println("last ELement: "+lastElement[j]);
+                System.out.println("size last ELement: "+lastElement.length);
+                if(lastElement.length==1 && StringUtils.isNumeric(lastElement[j])){
+                    int duration = Integer.parseInt(lastElement[j]);
+                    // check if the proposal would fit into the time constraints
+                    if(duration >= 1 && duration <= 240){
+
+                        String talkTitle = "";
+                        for(int k = 0; k < proposalParts.length-1; k++){
+                            talkTitle += proposalParts[j];
+                        }
+                        unplannedTalks.add(new Talk(talkTitle,duration));
+                        System.out.println("new Talk :) .Now we have "+unplannedTalks.size());
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void scheduleTalks(){
