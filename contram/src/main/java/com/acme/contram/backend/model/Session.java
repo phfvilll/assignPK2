@@ -10,6 +10,7 @@ public class Session {
     private LinkedList<TalkRecord> records;
     private int timeLeft;
     private String lastEventTitle;
+
     private LocalTime lastEventTime;
 
     public Session(int timeLeft, String lastEventTitle, LocalTime lastEventTime) {
@@ -34,4 +35,8 @@ public class Session {
     public String getLastEventTitle() { return lastEventTitle; }
 
     public LocalTime getLastEventTime() { return lastEventTime; }
+
+    public void setLastEventTime(LocalTime lastEventTime) {
+        this.lastEventTime = lastEventTime;
+    }
 }

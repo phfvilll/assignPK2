@@ -1,9 +1,9 @@
 package com.acme.contram.backend.model;
 
-public class Talk {
+public class Talk implements Comparable<Talk> {
 
     private String title;
-    private int duration;
+    private Integer duration;
 
     public Talk(String title, int duration) {
         this.title = title;
@@ -16,5 +16,10 @@ public class Talk {
 
     public int getDuration() {
         return duration;
+    }
+
+    @Override
+    public int compareTo(Talk o) {
+        return this.duration.compareTo(o.getDuration());
     }
 }
