@@ -19,8 +19,8 @@ public class MainView extends VerticalLayout {
 
     private final String inputPlaceholder = "Please enter your proposals here (one per line)." +
             "\n You can choose between the following 2 formats:" +
-            "\n [talk title] [number between 1 and 240]min" +
-            "\n [talk title] lightning" +
+            "\n [talk title without numbers] [number between 1 and 240]min" +
+            "\n [talk title without numbers] lightning" +
             "\n e.g.:" +
             "\n Innovative Technology Solutions 42min" +
             "\n or:" +
@@ -78,6 +78,7 @@ public class MainView extends VerticalLayout {
         ScheduleService scheduleService = new ScheduleService();
         button.addClickListener(e -> {
 
+
             // set up a notification message to inform the user about incorrect formatted proposals
             int countedErrors = scheduleService.parseProposals(inputArea.getValue());
             String notificationMessage = "Created schedule for your conference with " + countedErrors;
@@ -93,7 +94,7 @@ public class MainView extends VerticalLayout {
             Notification.show(notificationMessage);
 
             // ask for the created conference schedule as a List
-            LinkedList<String> schedule = scheduleService.scheduleToStringArray();
+            LinkedList<String> schedule = scheduleService.getOutputList();
 
             String outputString = "<br>";
             for(int i = 0; i < schedule.size(); i++){

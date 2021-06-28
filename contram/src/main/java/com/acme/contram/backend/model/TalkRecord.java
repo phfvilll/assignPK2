@@ -2,14 +2,15 @@ package com.philippk.cotrama.model;
 
 import com.acme.contram.backend.model.Talk;
 
+import java.time.LocalTime;
 import java.util.Date;
 
 public class TalkRecord {
 
     private Talk talk;
-    private Date timeOfDate;
+    private LocalTime timeOfDate;
 
-    public TalkRecord(Talk talk, Date timeOfDate) {
+    public TalkRecord(Talk talk, LocalTime timeOfDate) {
         this.talk = talk;
         this.timeOfDate = timeOfDate;
     }
@@ -18,7 +19,7 @@ public class TalkRecord {
         return talk;
     }
 
-    public Date getTimeOfDate() {
+    public LocalTime getTimeOfDate() {
         return timeOfDate;
     }
 }
