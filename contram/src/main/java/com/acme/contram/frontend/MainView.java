@@ -1,0 +1,91 @@
+package com.acme.contram.frontend;
+
+import com.acme.contram.backend.ScheduleService;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.router.Route;
+
+import java.util.LinkedList;
+
+@Route
+@StyleSheet("/styles.css")
+public class MainView extends VerticalLayout {
+
+    public MainView() {
+
+        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        setSizeFull();
+        //addClassName("main-view");
+
+        H1 header = new H1("ConTraM");
+        header.getElement().getThemeList().add("dark");
+        //Object[] test = header.getElement().getThemeList().toArray();
+        //System.out.println(test[0].toString());
+        header.getElement().getStyle().set("width","100%");
+        header.getElement().getStyle().set("margin","0");
+        header.getElement().getStyle().set("padding","16px");
+        add(header);
+
+        H2 header2 = new H2("Conference Track Management");
+        header2.getElement().getStyle().set("width","100%");
+        header2.getElement().getStyle().set("margin","0");
+        header2.getElement().getStyle().set("padding-top","12px");
+        header2.getElement().getStyle().set("text-align","center");
+        add(header2);
+
+        // Use custom CSS classes to apply styling. This is defined in shared-styles.css.
+        //addClassName("centered-content");
+        // This TextArea provides text input of proposals
+        TextArea inputArea = new TextArea();
+        inputArea.getElement().getStyle().set("width","100%");
+        inputArea.getElement().getStyle().set("height","40%");
+        inputArea.setPlaceholder("Please enter your proposals here (one per line)." +
+                "\n You can choose between the following 2 formats:" +
+                "\n [talk title] [number]min" +
+                "\n [talk title] lightning" +
+                "\n e.g.:" +
+                "\n Innovative Technology Solutions 42min" +
+                "\n or:" +
+                "\n History of Cloud Engineering lightning" +
+                "\n (Note that incorrectly formatted proposals will be ignored during the scheduling process.)");
+        add(inputArea);
+
+        // Theme variants give you predefined extra styles for components.
+        // Example: Primary button is more prominent look.
+        // button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        Button button = new Button("schedule proposals");
+        button.getElement().getStyle().set("width","100%");
+        button.getElement().getThemeList().add("primary");
+        add(button);
+
+        // Span to show the schedule
+        Span outputSpan = new Span();
+        outputSpan.getElement().getStyle().set("width","100%");
+        outputSpan.getElement().getStyle().set("height","30%");
+        outputSpan.getElement().setProperty("innerHTML","");
+        outputSpan.getElement().getStyle().set("padding-left","16px");
+        add(outputSpan);
+
+        // Button click listener to trigger the scheduling process
+        ScheduleService scheduleService = new ScheduleService();
+        button.addClickListener(e -> {
+            Notification.show("Created schedule for your conference with "
+                    +scheduleService.parseProposals(inputArea.getValue()));
+
+            LinkedList<String> schedule = scheduleService.scheduleToStringArray();
+            String outputNew = "<br>";
+            for(int i = 0; i < schedule.size(); i++){
+                outputNew += schedule.get(i) + "<br>";
+            }
+            outputNew+="&nbsp;";
+            outputSpan.getElement().setProperty("innerHTML",outputNew);
+        });
+    }
+}
