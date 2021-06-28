@@ -3,7 +3,7 @@ package com.acme.contram.backend;
 import com.acme.contram.backend.model.Session;
 import com.acme.contram.backend.model.Talk;
 import com.acme.contram.backend.model.Track;
-import com.philippk.cotrama.model.TalkRecord;
+import com.acme.contram.backend.model.TalkRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalTime;
@@ -11,25 +11,66 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.LinkedList;
 
+/**
+ * ScheduleService manages to create a Track-based schedule for talks from a passed String that includes proposals.
+ * ScheduleService also contains an output-list to hand over an arranged schedule.
+ * The class stores various constants to specify the components of a morning session and an afternoon session.
+ * @author  philippk
+ * @version 1.0
+ */
 public class ScheduleService {
+
+    // final values for the morning session
+    /**
+     *
+     */
+    public final static int AM_TIME_SPAN = 180;
+    /**
+     *
+     */
+    public final static String AM_END_EVENT_TITLE = "Lunch";
+    /**
+     *
+     */
+    public final static LocalTime AM_START_TIME = LocalTime.of(9,00);
+    /**
+     *
+     */
+    public final static LocalTime AM_END_EVENT_TIME = LocalTime.of(12,00);
+
+    // final values for the afternoon session
+    /**
+     *
+     */
+    public final static int PM_TIME_SPAN = 240;
+    /**
+     *
+     */
+    public final static String PM_END_EVENT_TITLE = "Networking Event";
+    /**
+     *
+     */
+    public final static LocalTime PM_START_TIME = LocalTime.of(13,00);
+    // final value is only known at the end of the scheduling process
+    private LocalTime pmEndEventTime;
 
     private LinkedList<Talk> unplannedTalks;
     private LinkedList<Track> trackList;
     private LinkedList<String> outputList;
 
-    // final values for the morning session
-    private final int amTimeSpan = 180;
-    private final String amEndEventTitle = "Lunch";
-    private final LocalTime amStartTime = LocalTime.of(9,00);
-    private final LocalTime amEndEventTime = LocalTime.of(12,00);
-
-    // final values for the afternoon session
-    private final int pmTimeSpan = 240;
-    private final String pmEndEventTitle = "Networking Event";
-    private final LocalTime pmStartTime = LocalTime.of(13,00);
-    // final value is only known at the end of the scheduling process
-    private LocalTime pmEndEventTime;
-
+    /**
+     *
+     * recognize talks in a passed String of proposals which are seperated in the passed String by carriage return.
+     * Accepted input formats are:
+     * "[talk title without numbers] [number between 1 and 240]min"
+     * and
+     * "[talk title without numbers] lightning".
+     * After reading the proposal-string and scheduling the talks, the arranged schedule is reachable by a getter-method.
+     * @param input
+     * @return
+     */
+    // if the reading loop is finished a method is triggered, that schedules the recognized talks to tracks.
+    // The result of the scheduling process is reeachable through the getOutputList()-method.
     public int parseProposals(String input) {
 
         unplannedTalks = new LinkedList<Talk>();
@@ -137,16 +178,16 @@ public class ScheduleService {
 
             Track newTrack = new Track(
                     trackList.size()+1,
-                    new Session(amTimeSpan, amEndEventTitle, amEndEventTime),
-                    new Session(pmTimeSpan, pmEndEventTitle, pmEndEventTime));
+                    new Session(AM_TIME_SPAN, AM_END_EVENT_TITLE, AM_END_EVENT_TIME),
+                    new Session(PM_TIME_SPAN, PM_END_EVENT_TITLE, pmEndEventTime));
 
             // fill up the morning session of the new track with talks
-            assignTalksToSession(newTrack.getMorningSession(),amStartTime);
+            assignTalksToSession(newTrack.getMorningSession(), AM_START_TIME);
 
             addLastEvent(newTrack.getMorningSession());
 
             // fill up the afternoon session of the new track with talks
-            assignTalksToSession(newTrack.getAfternoonSession(),pmStartTime);
+            assignTalksToSession(newTrack.getAfternoonSession(), PM_START_TIME);
 
             // The closing event of the afternoon session is added at a later stage, when the earliest possible time of date is known
 
@@ -192,6 +233,10 @@ public class ScheduleService {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public LinkedList<String> getOutputList(){
 
         outputList = new LinkedList<>();
@@ -218,7 +263,7 @@ public class ScheduleService {
         return outputList;
     }
 
-    public void addTalkRecords(Session session){
+    private void addTalkRecords(Session session){
 
         // set time format for the output text
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mma");

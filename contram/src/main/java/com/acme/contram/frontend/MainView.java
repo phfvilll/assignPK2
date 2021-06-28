@@ -14,11 +14,20 @@ import com.vaadin.flow.router.Route;
 
 import java.util.LinkedList;
 
+/**
+ * MainView provides a Vaadin-based user interface.
+ * The class is the entry point for the application on clientside in a browser.
+ * @author  philippk
+ * @version 1.0
+ */
 @Route
 @StyleSheet("/styles.css")
 public class MainView extends VerticalLayout {
 
-    private final String inputPlaceholder = "Please enter your proposals here (one per line)." +
+    /**
+     *
+     */
+    public static final String INPUT_PLACEHOLDER = "Please enter your proposals here (one per line)." +
             "\n You can choose between the following 2 formats:" +
             "\n [talk title without numbers] [number between 1 and 240]min" +
             "\n [talk title without numbers] lightning" +
@@ -28,6 +37,9 @@ public class MainView extends VerticalLayout {
             "\n History of Cloud Engineering lightning" +
             "\n (Note that incorrectly formatted proposals will be ignored during the scheduling process.)";
 
+    /**
+     *
+     */
     public MainView() {
 
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
@@ -56,7 +68,7 @@ public class MainView extends VerticalLayout {
         TextArea inputArea = new TextArea();
         inputArea.getElement().getStyle().set("width","100%");
         inputArea.getElement().getStyle().set("height","40%");
-        inputArea.setPlaceholder(inputPlaceholder);
+        inputArea.setPlaceholder(INPUT_PLACEHOLDER);
         add(inputArea);
 
         // Theme variants give you predefined extra styles for components.

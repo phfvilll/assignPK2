@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ContramApplication {
 
 	public static void main(String[] args) {
-
 		SpringApplication.run(ContramApplication.class, args);
 	}
 
