@@ -1,0 +1,76 @@
+
+CodeAssignment: CONFERENCE TRACK MANAGEMENT
+
+Assumptions and Hints
+
+@author: Philipp Kraatz
+
+-----------------------------------------------------------------------------------------
+
+assumptions about the problem:
+
++ there is a list of proposals.
++ one proposal consists of a simple string.
++ a track consists of a morning session and an afternoon session.
++ multiple tracks are possible
++ a talk consists of a talk title and a duration.
++ a new talk is constructed with a proposal-string in the format:
+    "[characters without numbers][Free Space][Number]'min'" 
+    or 
+    "[characters without numbers][Free Space]'lightning'"
++ even if the problem says that all proposal passed an initial screen process, a new proposal could come in a incorrect format so I should prevent a possible exception (I will ignore incorrect formatted proposals for planning, but inform the user about the issue).
++ a morning session starts at 9AM.
++ a morning session lasts 3 hours.
++ a morning session ends with lunch at 12PM.
++ a morning session contains as many talk as the time constraint fits.
++ an afternoon session starts at 1PM.
++ an afternoon session lasts 4 hours.
++ an afternoon session contains as many talk as the time constraint fits.
++ an afternoon session ends with a Networking Event, earliest time at 4PM, latest time at 5PM, depending on the latest talkend of all tracks.
++ scheduled talks have to fit in the time constraint of a session
++ no demand for fixed order to schedule talks
++ if the talk title includes numbers, I ignore the proposal and inform the user about the issue.
++ no gap between session. I guess that means also no gap between talks.
+
+-----------------------------------------------------------------------------------------
+
+assumptions about the implementation:
+
++ The task was to write a program that fits proposals into the time constraints of a day depending on the assumptions above.
+
++ I decided to write the program as a web application in Java (version 11) with the framework Vaadin (version 14.6.4) based on Spring Boot (version 2.5.2) and Maven (version 4.0.0).
+
++ In case of testing I used Junit Jupiter (version 5.7.2) for the unit tests whose dependency comes with the spring-boot-starter-test-dependency and I used the maven failsafe plugin for the integration test. 
+
++ In order to avoid overengineering, there is no database, because it is not necessary at all. As the task demands only to schedule a given input of proposals(not to safe them or handle them by a special service), I tried to keep the solution as simple as possible.
+
++ Therefore I implemented only 6 classes (besides the main-class to run the app). One class for the user interface, one class for the scheduling service and 4 classes for my object model consisting of tracks, sessions, talkrecords and talks.
+
++ The class MainView is mapped to the context root of the running application, so it is instantiated when you connect to the host server in the browser. MainView builds up the user interface and a button-click-listener implements the API of the ScheduleService-Class which is initialized by dependency injection. 
+
++ ScheduleService provides the method createSchedule(String[] proposals) which parses proposals to convert them into talks, counts errors that occur during parsing, schedules the talks as talkrecords in sessions to tracks, and converts the created schedule into a String-Array to return it.
+
++ Through the String-Array based interface, the API of ScheduleService could also easily communicate with Json. And If there would be a need to connect a database, the classes of the object model could be simply modified to serve as entities for the database. In future versions there could be functions like name conferences, safe them, plan multiple conferences, expand the user interface, export schedules etc.. But for now to keep everything appropriate and to implement only the given facts of the problem I tried to leave all unnecessary complexity behind.
+
+-----------------------------------------------------------------------------------------
+
+hints:
+
++ I commited every major step to show my development progress.
+--> First I set up the project with the spring initializr.
+--> Then I created the MainView-class in the userinterface-package and implemented the user interface including unit testing.
+--> After that I implemented my object model that consists of the Track-, Session-, TalkRecord- and Talk-class in the service.model-package including unit testing.
+--> Now I could implement the ScheduleService in three major steps in the service-package. The first step was to parse the incoming String-Array to list them as talks and count the errors that occur while doing so including unit testing.
+--> The second step was to schedule the list of unplanned talks to a list of tracks including unit testing.
+--> The third step was to convert the schedule(list of tracks) to a printable list of Strings and assign it together with the counted errors to a return value as a String-Array including unit testing.
+--> Then I added a click-listener to the UI's schedule button and implemented the API in it including unit testing.
+--> After that I could make the integration test with the maven-failsafe-plugin.
+--> Last but not Least I added this textfile to the repository.
+
++ I used IntelliJ IDEA 2021.1.2 (Ultimate Edition) to build the app.
+
++ the node_modules and target-folder are not uploaded to the repository. So the project has to be rebuild including a npm install (node required as well as a JDK and maven) before it is runnable.
+
++ The Spring Boot Application runs on a local Apache Tomcat Test-Server on port 8080. So it is accessible in the browser on: localhost:8080
+
+-----------------------------------------------------------------------------------------
