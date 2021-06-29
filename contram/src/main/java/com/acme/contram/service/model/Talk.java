@@ -1,4 +1,4 @@
-package com.acme.contram.backend.model;
+package com.acme.contram.service.model;
 
 /**
  * Talk consists of a title and a duration and can be scheduled for a session used by a TalkRecord.

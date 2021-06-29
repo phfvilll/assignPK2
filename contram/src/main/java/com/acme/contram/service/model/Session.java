@@ -1,4 +1,4 @@
-package com.acme.contram.backend.model;
+package com.acme.contram.service.model;
 
 import java.util.LinkedList;
 import java.time.LocalTime;

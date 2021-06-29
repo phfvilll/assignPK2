@@ -1,10 +1,11 @@
-package com.acme.contram.backend;
+package com.acme.contram.service;
 
-import com.acme.contram.backend.model.Session;
-import com.acme.contram.backend.model.Talk;
-import com.acme.contram.backend.model.Track;
-import com.acme.contram.backend.model.TalkRecord;
+import com.acme.contram.service.model.Session;
+import com.acme.contram.service.model.Talk;
+import com.acme.contram.service.model.Track;
+import com.acme.contram.service.model.TalkRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +19,7 @@ import java.util.LinkedList;
  * @author  philippk
  * @version 1.0
  */
+@Service
 public class ScheduleService {
 
     // final values for the morning session
@@ -66,25 +68,22 @@ public class ScheduleService {
      * and
      * "[talk title without numbers] lightning".
      * After reading the proposal-string and scheduling the talks, the arranged schedule is reachable by a getter-method.
-     * @param input
+     * @param proposals
      * @return
      */
-    // if the reading loop is finished a method is triggered, that schedules the recognized talks to tracks.
+    // if the reading loop is finished a method is triggered, that schedules the recognized talks to tracks through sessions as talk-records.
     // The result of the scheduling process is reeachable through the getOutputList()-method.
-    public int parseProposals(String input) {
+    public String[] createSchedule(String[] proposals) {
 
         unplannedTalks = new LinkedList<Talk>();
 
         // variable to count incorrect formatted proposals
         int errorCounter = 0;
 
-        // splitting the input String line per line by carriage return to get an array of all proposals
-        String[] lines = input.split("\n");
-
         // checking all proposals for the correct format and list the correct ones as talks
-        for (int i = 0; i < lines.length;i++){
+        for (int i = 0; i < proposals.length;i++){
             //handle one proposal
-            if(!checkProposal(lines[i])){
+            if(!checkProposal(proposals[i])){
                 errorCounter++;
             }
         }
@@ -92,7 +91,21 @@ public class ScheduleService {
         // schedule the listed talks
         scheduleTalks();
 
-        return errorCounter;
+        // convert the created track-list to a printable string-list
+        LinkedList<String> outputList = getOutputList();
+
+        // create return parameter
+        String[] schedule = new String[outputList.size()+1];
+
+        // attach the number of occured errors while parsing the incoming proposal-Array to the first field of the return parameter
+        schedule[0] = String.valueOf(errorCounter);
+
+        // reference the objects of the output-list to the schedule-Array
+        for(int i = 0; i < outputList.size();i++){
+            schedule[i+1] = outputList.get(i);
+        }
+
+        return schedule;
     }
 
     private boolean checkProposal(String proposal) {
@@ -233,11 +246,7 @@ public class ScheduleService {
         }
     }
 
-    /**
-     *
-     * @return
-     */
-    public LinkedList<String> getOutputList(){
+    private LinkedList<String> getOutputList(){
 
         outputList = new LinkedList<>();
 

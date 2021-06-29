@@ -1,4 +1,4 @@
-package com.acme.contram.backend.model;
+package com.acme.contram.service.model;
 
 /**
  * Track combines scheduled talks in a morning session and an afternoon session and is distinguishable by a track number.
