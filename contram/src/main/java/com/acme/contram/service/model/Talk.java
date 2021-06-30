@@ -39,10 +39,11 @@ public class Talk implements Comparable<Talk> {
 
     /**
      * The method returns 1 if the compared parameter has a shorter duration than the duration-property
-     * of the object and returns -1 if the compared parameter has a longer duration than the duration-property
-     * of the object.
+     * of the object, returns -1 if the compared parameter has a longer duration than the duration-property
+     * of the object and returns 0 if the compared parameter has the same duration.
      * @param talk
-     * @return 1 if parameter-talk is shorter or -1 if parameter-talk is longer
+     * @return 1 if parameter-talk is shorter; -1 if parameter-talk is longer; 0 if parameter-talk has the
+     * same duration
      */
     @Override
     public int compareTo(Talk talk) { return this.duration.compareTo(talk.getDuration()); }

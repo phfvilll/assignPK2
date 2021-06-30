@@ -2,8 +2,6 @@ package com.acme.contram.service;
 
 import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class ScheduleServiceTest {
 
     private ScheduleService scheduleService;
@@ -42,7 +40,7 @@ class ScheduleServiceTest {
         String[] schedule = scheduleService.createSchedule(proposalLines);
 
         // then: array of schedule-lines is received in sequence of used method
-        String[] scheduleLines = {"Track 1:",
+        String[] scheduleLines = {"0","Track 1:",
         "09:00AM Writing Fast Tests Against Enterprise Rails 60min",
         "10:00AM Communicating Over Distance 60min",
         "11:00AM Rails Magic 60min",
@@ -53,7 +51,7 @@ class ScheduleServiceTest {
         "03:45PM Ruby Errors from Mismatched Gem Versions 45min",
         "04:30PM Lua for the Masses 30min",
         "05:00PM Networking Event",
-        "",
+        " ",
         "Track 2:",
         "09:00AM Common Ruby Errors 45min",
         "09:45AM Accounting-Driven Development 45min",
@@ -69,11 +67,10 @@ class ScheduleServiceTest {
         "04:00PM Rails for Python Developers lightning",
         "05:00PM Networking Event"};
 
+        // test if the created schedule has the expected length
         Assertions.assertEquals(scheduleLines.length,schedule.length);
-        Assertions.assertAll(
-                () -> assertEquals(scheduleLines[0],schedule[0]),
-                () -> assertEquals(scheduleLines[0],schedule[0]),
-                () -> assertEquals(scheduleLines[0],schedule[0]),
-                () -> assertEquals(scheduleLines[0],schedule[0]));
+
+        // test if the created schedule has the expected content
+        Assertions.assertArrayEquals(scheduleLines,schedule);
     }
 }

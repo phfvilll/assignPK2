@@ -1,26 +1,26 @@
 package com.acme.contram.service.model;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrackTest {
 
+    private Track track;
+
     @BeforeEach
     void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
+        track = new Track();
     }
 
     @Test
-    void getMorningSession() {
-    }
+    @DisplayName("test getting the morning session and the afternoon session of a track")
+    void testGetSessions() {
+        //given: track;
 
-    @Test
-    void getAfternoonSession() {
+        //when: initialized;
+
+        //then: morning session and afternoon session of the track should be accessible
+        //Assertions.assertEquals();
     }
 }

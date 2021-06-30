@@ -256,7 +256,10 @@ public class ScheduleService {
             // add all talks from afternoon session to the outputList
             addTalks(currentTrack.getAfternoonSession());
 
-            outputList.add(" ");
+            // add only a blank line if another track follows
+            if(i != trackList.size()-1){
+                outputList.add(" ");
+            }
         }
         return outputList;
     }

@@ -10,17 +10,34 @@ Assumptions and Hints
 assumptions about the problem and the resulting test cases:
 
 + convert proposals to a schedule
- \--> test case to pass: given: array of proposal-lines; when: scheduling completed (used method should schedule the talks with the longest duration first); then: array of schedule-lines is received in sequence of used method
-  \--> test name: "test converting proposals to a schedule"; test method: testCreateSchedule()
+ \--> test case to pass: 
+		given: array of proposal-lines; 
+		when: scheduling completed (used method should schedule the talks with the longest duration first); 
+		then: array of schedule-lines is received in sequence of used method
+  	\--> test name: "test converting proposals to a schedule"; 
+		test method: testCreateSchedule()
+		test class: ScheduleServiceTest
+
++ a talk consists of a talk title and a duration
+ \--> test case to pass: 
+		given: talk; 
+		when: initialized; 
+		then: talk title and duration of the talk should be accessible
+  	\--> test name: "test getting talk title and duration from a title"; 
+		test method: testGettingTitleAndDuration()
+		test class: TalkTest
 
 + a track consists of a morning session and an afternoon session.
- \--> test case to pass: given: track; when: initialized; then: morning session and afternoon session of the track should be accessible
+ \--> test case to pass:
+		given: track;
+		when: initialized;
+		then: morning session and afternoon session of the track should be accessible
+  	\--> test name: "test getting the morning session and the afternoon session of a track"; 
+		test method: testGetSessions()
+		test class: TrackTest
 
 + multiple tracks are possible
  \--> test case to pass: given: list of talks; when: talks do not fit in one track; then: a new track should be created
-
-+ a talk consists of a talk title and a duration
- \--> test case to pass: given: talk; when: initialized; then: talk title and duration of the talk should be accessible
 
 + a new talk is constructed with a proposal-string in the format:
     "[characters without numbers][Free Space][Number]'min'" 
@@ -28,8 +45,6 @@ assumptions about the problem and the resulting test cases:
     "[characters without numbers][Free Space]'lightning'"
  \--> test case to pass: given: proposal; when: proposal parsed; then: no error should be received
 
-+ even if the problem says that all proposal passed an initial screen process, the connection to an user interface a new proposal could come in a incorrect format so I should prevent a possible exception (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
- \--> test case to pass: given: proposal; when: proposal parsed; then: an error should be received
 
 + a morning session starts at 9AM
  \--> test case to pass: given: a morning session; when: initialized; then: start time of session should be 9AM
@@ -67,25 +82,28 @@ assumptions about the problem and the resulting test cases:
 + no gap between session. I guess that means also no gap between talks
  \--> test case to pass: given: session; when: a talk ends and another is in the queue; then: start time of new talk should be equal to the end time of the previous talk
 
++ even if the problem says that all proposal passed an initial screen process, the connection to an user interface a new proposal could come in a incorrect format so I should prevent a possible exception (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
+ \--> test case to pass: given: proposal; when: proposal parsed; then: an error should be received
+
 ++added assumptions/test cases for 100% code coverage:
 
 -----------------------------------------------------------------------------------------
 
 assumptions about the implementation:
 
-+ The task was to write a program that fits proposals into the time constraints of a day depending on the assumptions above.
++ The task was to write a program that fits proposals into the time constraints of a day depending on the assumptions and test cases above.
 
 + I decided to write the program as a web application in Java (version 11) with the framework Vaadin (version 14.6.4) based on Spring Boot (version 2.5.2) and Maven (version 4.0.0).
 
-+ In case of testing I used Junit Jupiter (version 5.7.2) for the unit tests whose dependency comes with the spring-boot-starter-test-dependency and I used the maven failsafe plugin for the integration test. 
++ In case of testing I used Junit Jupiter (version 5.7.2) whose dependency comes with the spring-boot-starter-test-dependency. 
 
 + In order to avoid overengineering, there is no database, because it is not necessary at all. As the task demands only to schedule a given input of proposals(not to safe them or handle them by a special service), I tried to keep the solution as simple as possible.
 
-+ Therefore I implemented only 6 classes (besides the main-class to run the app). One class for the scheduling service, four classes for my object model consisting of tracks, sessions, talkrecords, talks and one class for the user interface. I created the class TalkRecords to serve as a link between talks, sessions and time of date, because I do not use a database. With an underlaying relational database this class would be obsolete.
++ Therefore I implemented only 5 classes (besides the main-class to run the app). One class for the scheduling service, 3 classes for my object model consisting of tracks, sessions, talks and one class for the user interface.
 
 + The class MainView is mapped to the context root of the running application, so it is instantiated when the user connect to the host server in the browser. MainView builds up the user interface and a button-click-listener implements the API of the ScheduleService-Class which is initialized by dependency injection. 
 
-+ ScheduleService provides the method createSchedule(String[] proposals) which parses proposals to convert them into talks, counts errors that occur during parsing, schedules the talks as talkrecords in sessions to tracks, and converts the created schedule into a String-Array to return it.
++ ScheduleService provides the method createSchedule(String[] proposals) which parses proposals to convert them into talks, counts errors that occur during parsing, schedules the talks on sessions which belong to tracks, and converts the created schedule into a String-Array to return it.
 
 + Through the String-Array based interface, the API of ScheduleService could also easily communicate with Json. And If there would be a need to connect a database, the classes of the object model could be simply modified to serve as entities for the database. But for now to keep everything appropriate and to implement only the given facts of the problem I tried to leave all unnecessary complexity behind.
 
