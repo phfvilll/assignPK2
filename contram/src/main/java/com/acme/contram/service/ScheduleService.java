@@ -3,7 +3,6 @@ package com.acme.contram.service;
 import com.acme.contram.service.model.Session;
 import com.acme.contram.service.model.Talk;
 import com.acme.contram.service.model.Track;
-import com.acme.contram.service.model.TalkRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +17,8 @@ import java.util.LinkedList;
  *
  * The method createSchedule(String[] proposals) consists of three parts.
  *
- * Through the first part the method recognizes talks in a passed String-Array of proposals.
- * It checks if a talk title exists, if a String is completly empty, if a talk title contains numbers,
+ * Through the first part, the method recognizes talks in a passed String-Array of proposals.
+ * It checks if a talk title exists, if a String is completely empty, if a talk title contains numbers,
  * if the duration of a talk would even fit in a session (for this it have to be between 1 and 240 minutes)
  * and if the proposal have a correct time indication at the end of its String.
  *
@@ -28,14 +27,14 @@ import java.util.LinkedList;
  * and
  * "[talk title without numbers] lightning".
  *
- * Through the secand part, if the reading of the proposals is finished, the scheduling process begins
- * to assign the recognized talks to tracks through sessions as talk-records.
+ * Through the second part, if the reading of the proposals is finished, the scheduling process begins
+ * to assign the recognized talks to sessions which are properties of the tracks.
  *
- * Through the third part, as a result of the scheduling process the method converts the created schedule
- * to a printable list of Strings.
+ * Through the third part, as a result of the scheduling process the method creates a printable version
+ * of the schedule as an Array of Strings.
  *
- * The method returns a String-Array including the printable schedule which first field serves to hand over
- * the amount of errors that occur during the reading of the proposals.
+ * The method returns a String-Array including the printable schedule which first field serves in the
+ * current version to hand over the amount of errors that occur during the reading of the proposals.
  * @author  Philipp Kraatz
  * @version 1.0
  */
@@ -204,10 +203,11 @@ public class ScheduleService {
             // schedule a talk if enough time is available to fit it into the session
             if(currentTalk.getDuration()<=session.getTimeLeft()){
 
-                // the talk fits in, so assign it to the session through a new talk record
-                session.getRecords().add(new TalkRecord(currentTalk,currentTime));
+                // the talk fits in, so assign it to the session
+                session.getScheduledTalks().add(currentTalk);
+                session.getBlockedTimeOfDay().add(currentTime);
 
-                // reducing the time which left to the session by substractiong the duration of the new
+                // reducing the time which left to the session by the duration of the new
                 // scheduled talk
                 session.setTimeLeft(session.getTimeLeft()-currentTalk.getDuration());
 
@@ -231,7 +231,8 @@ public class ScheduleService {
 
     private void addLastEvent(Session session){
         // add the closing event of a session to the records with a duration of 0 to identify it later in the getOutputList()-method
-        session.getRecords().add(new TalkRecord(new Talk(session.getLastEventTitle(),0),session.getLastEventTime()));
+        session.getScheduledTalks().add(new Talk(session.getLastEventTitle(),0));
+        session.getBlockedTimeOfDay().add(session.getLastEventTime());
     }
 
     private LinkedList<String> getOutputList(){
@@ -250,48 +251,51 @@ public class ScheduleService {
             outputList.add("Track "+(i+1)+":");
 
             // add all talks from morning session to the outputList
-            addTalkRecords(currentTrack.getMorningSession());
+            addTalks(currentTrack.getMorningSession());
 
             // add all talks from afternoon session to the outputList
-            addTalkRecords(currentTrack.getAfternoonSession());
+            addTalks(currentTrack.getAfternoonSession());
 
             outputList.add(" ");
         }
         return outputList;
     }
 
-    private void addTalkRecords(Session session){
+    private void addTalks(Session session){
 
         // set time format for the output text
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mma");
 
         // add every talk from the session to the outputList
-        for (int j = 0; j < session.getRecords().size();j++){
+        for (int j = 0; j < session.getScheduledTalks().size(); j++){
 
-            TalkRecord currentRecord = session.getRecords().get(j);
+            Talk currentTalk = session.getScheduledTalks().get(j);
+            LocalTime currentTimeOfDate = session.getBlockedTimeOfDay().get(j);
 
             // Catch final Event of a session
-            if(currentRecord.getTalk().getDuration()==0){
-                // put String together for final Event output-line
-                this.outputList.add(currentRecord.getTimeOfDate().format(formatter)+
-                        " "+
-                        currentRecord.getTalk().getTitle());
+            if(currentTalk.getDuration()==0){
 
-            } else if(currentRecord.getTalk().getDuration()==5){
-                // catch Lightning Event
-                // put String together for lightning output-line
-                this.outputList.add(currentRecord.getTimeOfDate().format(formatter)+
+                // add String for final Event output-line
+                this.outputList.add(currentTimeOfDate.format(formatter)+
                         " "+
-                        currentRecord.getTalk().getTitle() +
+                        currentTalk.getTitle());
+
+            } else if(currentTalk.getDuration()==5){
+                // catch Lightning Event
+
+                // add String for lightning output-line
+                this.outputList.add(currentTimeOfDate.format(formatter)+
+                        " "+
+                        currentTalk.getTitle() +
                         " lightning");
 
             } else {
-                // put String together for regular output-line
-                this.outputList.add(currentRecord.getTimeOfDate().format(formatter)+
+                // add String for regular output-line
+                this.outputList.add(currentTimeOfDate.format(formatter)+
                         " "+
-                        currentRecord.getTalk().getTitle() +
+                        currentTalk.getTitle() +
                         " "+
-                        currentRecord.getTalk().getDuration()+
+                        currentTalk.getDuration()+
                         "min");
             }
         }

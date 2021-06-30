@@ -1,12 +1,12 @@
 package com.acme.contram.service.model;
 
 /**
- * Talk consists of a title and a duration and can be scheduled for a session used by a TalkRecord.
+ * Talk consists of a title and a duration and can be scheduled for a session.
  * Talk duration is comparable.
  * Talk is the bottom of the model hierarchy in the current version.
  * @author  Philipp Kraatz
  * @version 1.0
- * @see     TalkRecord
+ * @see     Session
  */
 public class Talk implements Comparable<Talk> {
 
