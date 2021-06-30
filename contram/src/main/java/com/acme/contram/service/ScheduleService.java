@@ -13,66 +13,55 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 /**
- * ScheduleService manages to create a Track-based schedule for talks from a passed String that includes proposals.
- * ScheduleService also contains an output-list to hand over an arranged schedule.
- * The class stores various constants to specify the components of a morning session and an afternoon session.
- * @author  philippk
+ * ScheduleService provides the method createSchedule(String[] proposals) to create a Track-based schedule
+ * of talks from a passed String-Array that contains the proposals for the talks.
+ *
+ * The method createSchedule(String[] proposals) consists of three parts.
+ *
+ * Through the first part the method recognizes talks in a passed String-Array of proposals.
+ * It checks if a talk title exists, if a String is completly empty, if a talk title contains numbers,
+ * if the duration of a talk would even fit in a session (for this it have to be between 1 and 240 minutes)
+ * and if the proposal have a correct time indication at the end of its String.
+ *
+ * Accepted input formats for proposals are:
+ * "[talk title without numbers] [number between 1 and 240]min"
+ * and
+ * "[talk title without numbers] lightning".
+ *
+ * Through the secand part, if the reading of the proposals is finished, the scheduling process begins
+ * to assign the recognized talks to tracks through sessions as talk-records.
+ *
+ * Through the third part, as a result of the scheduling process the method converts the created schedule
+ * to a printable list of Strings.
+ *
+ * The method returns a String-Array including the printable schedule which first field serves to hand over
+ * the amount of errors that occur during the reading of the proposals.
+ * @author  Philipp Kraatz
  * @version 1.0
  */
 @Service
 public class ScheduleService {
 
-    // final values for the morning session
-    /**
-     *
-     */
-    public final static int AM_TIME_SPAN = 180;
-    /**
-     *
-     */
-    public final static String AM_END_EVENT_TITLE = "Lunch";
-    /**
-     *
-     */
-    public final static LocalTime AM_START_TIME = LocalTime.of(9,00);
-    /**
-     *
-     */
-    public final static LocalTime AM_END_EVENT_TIME = LocalTime.of(12,00);
-
-    // final values for the afternoon session
-    /**
-     *
-     */
-    public final static int PM_TIME_SPAN = 240;
-    /**
-     *
-     */
-    public final static String PM_END_EVENT_TITLE = "Networking Event";
-    /**
-     *
-     */
-    public final static LocalTime PM_START_TIME = LocalTime.of(13,00);
-    // final value is only known at the end of the scheduling process
-    private LocalTime pmEndEventTime;
-
     private LinkedList<Talk> unplannedTalks;
     private LinkedList<Track> trackList;
     private LinkedList<String> outputList;
+    private LocalTime endTimeOfTrack;
 
     /**
-     *
-     * recognize talks in a passed String of proposals which are seperated in the passed String by carriage return.
-     * Accepted input formats are:
+     * Accepted input formats for the proposals in the parameter-String[] are:
      * "[talk title without numbers] [number between 1 and 240]min"
      * and
      * "[talk title without numbers] lightning".
-     * After reading the proposal-string and scheduling the talks, the arranged schedule is reachable by a getter-method.
+     *
+     * Proposals in an incorrect format are counted as errors and will be ignored in the scheduling process.
+     *
+     * The method returns a String-Array including the printable schedule which first field serves to hand over
+     * the amount of errors that occur during the reading of the proposals.
+     *
      * @param proposals
-     * @return
+     * @return a String[] that contains the amount of errors in the first field and the printable schedule in the
+     * other fields.
      */
-    // if the reading loop is finished a method is triggered, that schedules the recognized talks to tracks through sessions as talk-records.
-    // The result of the scheduling process is reeachable through the getOutputList()-method.
     public String[] createSchedule(String[] proposals) {
 
         unplannedTalks = new LinkedList<Talk>();
@@ -169,38 +158,26 @@ public class ScheduleService {
 
         trackList = new LinkedList<Track>();
 
-        pmEndEventTime = LocalTime.of(16,00);
+        // set the time for the Networking Event per default at 4PM and postpone it through the scheduling
+        // process up to 5PM to update all afternoon sessions when all talks are scheduled
+        endTimeOfTrack = LocalTime.of(16,00);
 
-        for(int i = 0; i < unplannedTalks.size(); i++){
-            System.out.println(unplannedTalks.get(i).getTitle()+" "+
-                    unplannedTalks.get(i).getDuration());
-        }
-
-        System.out.println(" ");
-
+        // sort the list of unplanned talks from the longest to the shortest talk duration to be able to
+        // schedule the longest talks first through a simple loop
         Collections.sort(unplannedTalks, Collections.reverseOrder());
-
-
-        for(int i = 0; i < unplannedTalks.size(); i++){
-            System.out.println(unplannedTalks.get(i).getTitle()+" "+
-                    unplannedTalks.get(i).getDuration());
-        }
 
         // create new tracks and fill them with talks as long as there are talks that aren't scheduled
         while(unplannedTalks.size()>0){
 
-            Track newTrack = new Track(
-                    trackList.size()+1,
-                    new Session(AM_TIME_SPAN, AM_END_EVENT_TITLE, AM_END_EVENT_TIME),
-                    new Session(PM_TIME_SPAN, PM_END_EVENT_TITLE, pmEndEventTime));
+            Track newTrack = new Track();
 
             // fill up the morning session of the new track with talks
-            assignTalksToSession(newTrack.getMorningSession(), AM_START_TIME);
+            assignTalksToSession(newTrack.getMorningSession());
 
             addLastEvent(newTrack.getMorningSession());
 
             // fill up the afternoon session of the new track with talks
-            assignTalksToSession(newTrack.getAfternoonSession(), PM_START_TIME);
+            assignTalksToSession(newTrack.getAfternoonSession());
 
             // The closing event of the afternoon session is added at a later stage, when the earliest possible time of date is known
 
@@ -209,8 +186,46 @@ public class ScheduleService {
 
         // The earliest possible time of date for the last Event of the afternoon is now known and can be added to the afternoon sessions of every track
         for(int i = 0; i < trackList.size(); i++){
-            trackList.get(i).getAfternoonSession().setLastEventTime(pmEndEventTime);
+            trackList.get(i).getAfternoonSession().setLastEventTime(endTimeOfTrack);
             addLastEvent(trackList.get(i).getAfternoonSession());
+        }
+    }
+
+    private void assignTalksToSession(Session session){
+
+        // keep the point of time to assign the correct time of date to new talk records
+        LocalTime currentTime = session.getStartTime();
+
+        // try to fit talks into session from the longest to the shortest
+        for (int i = 0; i < unplannedTalks.size(); i++){
+
+            Talk currentTalk = unplannedTalks.get(i);
+
+            // schedule a talk if enough time is available to fit it into the session
+            if(currentTalk.getDuration()<=session.getTimeLeft()){
+
+                // the talk fits in, so assign it to the session through a new talk record
+                session.getRecords().add(new TalkRecord(currentTalk,currentTime));
+
+                // reducing the time which left to the session by substractiong the duration of the new
+                // scheduled talk
+                session.setTimeLeft(session.getTimeLeft()-currentTalk.getDuration());
+
+                // update the point of time by the duration of the new scheduled talk
+                currentTime = currentTime.plusMinutes(currentTalk.getDuration());
+
+                // update the earliest possible time of date for the last Event of the afternoon session
+                if(currentTime.isAfter(endTimeOfTrack)){
+                    endTimeOfTrack = currentTime;
+                }
+
+                // remove scheduled talk from the list for unplanned talks
+                unplannedTalks.remove(i);
+
+                // reset the run variable to start again from the beginning of the list to avoid to skip
+                // list-elements as a result of the previous used remove()-method
+                i = -1;
+            }
         }
     }
 
@@ -219,36 +234,9 @@ public class ScheduleService {
         session.getRecords().add(new TalkRecord(new Talk(session.getLastEventTitle(),0),session.getLastEventTime()));
     }
 
-    private void assignTalksToSession(Session session, LocalTime startTime){
-
-        LocalTime currentTime = startTime;
-        System.out.println("StartTime: "+currentTime);
-        for (int i = 0; i < unplannedTalks.size(); i++){
-
-            Talk currentTalk = unplannedTalks.get(i);
-
-            if(currentTalk.getDuration()<=session.getTimeLeft()){
-
-                session.getRecords().add(new TalkRecord(currentTalk,currentTime));
-                session.setTimeLeft(session.getTimeLeft()-currentTalk.getDuration());
-                currentTime = currentTime.plusMinutes(currentTalk.getDuration());
-                System.out.println(currentTime);
-
-                // update the earliest possible time of date for the last Event of the afternoon
-                if(currentTime.isAfter(pmEndEventTime)){
-                    pmEndEventTime = currentTime;
-                }
-
-                unplannedTalks.remove(i);
-                // reset the run variable to start again from the beginning of the list to avoid to skip list-elements as a result of the previous used remove()-method
-                i = -1;
-            }
-        }
-    }
-
     private LinkedList<String> getOutputList(){
 
-        outputList = new LinkedList<>();
+        outputList = new LinkedList<String>();
 
         if(trackList.size()==0){
             return outputList;
@@ -259,7 +247,7 @@ public class ScheduleService {
 
             Track currentTrack = trackList.get(i);
 
-            outputList.add("Track "+currentTrack.getTrackNumber()+":");
+            outputList.add("Track "+(i+1)+":");
 
             // add all talks from morning session to the outputList
             addTalkRecords(currentTrack.getMorningSession());

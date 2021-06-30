@@ -13,12 +13,14 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.LinkedList;
-
 /**
  * MainView provides a Vaadin-based user interface.
- * The class is the entry point for the application on clientside in a browser.
- * @author  philippk
+ * It consists of seven components: a main header for the application name, a second header to point out
+ * the core service of the web app, a text area for user input, a button to call the service, a label
+ * that serves as header for the answer and a span to print the created schedule.
+ * The class references to a Cascading Style Sheet (.css) to customize the arrangement of the components.
+ * MainView is the entry point for the running application when connecting to the server in the browser.
+ * @author  Philipp Kraatz
  * @version 1.0
  */
 @Route
@@ -26,7 +28,8 @@ import java.util.LinkedList;
 public class MainView extends VerticalLayout {
 
     /**
-     *
+     * The INPUT_PLACEHOLDER constant serves as placeholder for the input-textArea to inform the user
+     * about correct formatting of proposals.
      */
     public static final String INPUT_PLACEHOLDER = "Please enter your proposals here (one per line)." +
             "\n You can choose between the following 2 formats:" +
@@ -39,7 +42,6 @@ public class MainView extends VerticalLayout {
             "\n (Note that incorrectly formatted proposals will be ignored during the scheduling process.)";
 
     private ScheduleService scheduleService;
-
     private H1 headerApp;
     private H2 headerPurpose;
     private TextArea textAreaInput;
@@ -48,52 +50,53 @@ public class MainView extends VerticalLayout {
     private Span spanOutput;
 
     /**
-     *
+     * The constructor initializes all components of the user interface and implements the API of the
+     * ScheduleService through a button click-listener.
+     * The scheduleService is instantiated through dependency injection.
      */
     public MainView(@Autowired ScheduleService scheduleService) {
 
-        System.out.println("Someone load me :)");
-
         this.scheduleService = scheduleService;
 
+        // set all components per default on center alignment
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+
+        // set layout to the whole browser window
         setSizeFull();
+
+        // add style for the header to the layout
         addClassName("main-view");
 
+        // the main header shows the application name
         this.headerApp = new H1("ConTraM");
         headerApp.getElement().getThemeList().add("dark");
-        //Object[] test = header.getElement().getThemeList().toArray();
-        //System.out.println(test[0].toString());
         add(headerApp);
 
+        // the purpose header points out the core service of the application
         this.headerPurpose = new H2("Conference Track Management");
         add(headerPurpose);
 
-        // Use custom CSS classes to apply styling. This is defined in shared-styles.css.
-        //addClassName("centered-content");
-        // This TextArea provides text input of proposals
+        // the input text area provides the text input of proposals
         this.textAreaInput = new TextArea();
         textAreaInput.setPlaceholder(INPUT_PLACEHOLDER);
         add(textAreaInput);
 
-        // Theme variants give you predefined extra styles for components.
-        // Example: Primary button is more prominent look.
-        // button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        // the schedule button serves to call the scheduling service
         this.buttonSchedule = new Button("schedule proposals");
         buttonSchedule.getElement().getThemeList().add("primary");
         add(buttonSchedule);
 
+        // the output label serves as header for the answer of the scheduling service
         this.labelOutput = new Label(" ");
         add(labelOutput);
 
-        // Span to show the schedule
+        // the output span contains the schedule after calling the service
         this.spanOutput = new Span();
         spanOutput.getElement().setProperty("innerHTML","");
         add(spanOutput);
 
-        // Button click listener to trigger the scheduling process
+        // a button click listener to trigger the scheduling process
         buttonSchedule.addClickListener(click -> processData());
-
     }
 
     private void processData(){
@@ -145,7 +148,7 @@ public class MainView extends VerticalLayout {
 
         String notificationMessage = " Scheduling process completed with " + errors;
 
-        // end the message dependent on the amount of errors
+        // end the message depending on the amount of errors
         if (errors == 0) {
             notificationMessage += " errors.";
         } else if (errors == 1) {
