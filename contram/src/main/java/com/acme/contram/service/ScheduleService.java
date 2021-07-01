@@ -102,7 +102,7 @@ public class ScheduleService {
         String[] proposalParts = proposal.split(" ");
 
         // ignore proposals without talk title
-        if(proposalParts.length<=1){
+        if(proposalParts.length<=1 ){
             // skipping empty lines
             if(proposalParts.length==0 || proposalParts[0] == ""){
                 return true;

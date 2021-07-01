@@ -13,7 +13,7 @@ assumptions about the problem and the resulting test cases:
  \--> test case to pass: 
 		given: array of proposal-lines; 
 		when: scheduling completed (used method should schedule the talks with the longest duration first); 
-		then: array of schedule-lines is received in sequence of used method
+		then: array of schedule-lines is received in sequence of used method (longest talks first)
   	\--> test name: "test converting proposals to a schedule"; 
 		test method: testCreateSchedule()
 		test class: ScheduleServiceTest
@@ -105,35 +105,7 @@ assumptions about the problem and the resulting test cases:
 		test method: testGetSessions()
 		test class: TrackTest
 
-
-
-+ multiple tracks are possible
- \--> test case to pass: given: list of talks; when: talks do not fit in one track; then: a new track should be created
-
-+ a new talk is constructed with a proposal-string in the format:
-    "[characters without numbers][Free Space][Number]'min'" 
-    or 
-    "[characters without numbers][Free Space]'lightning'"
- \--> test case to pass: given: proposal; when: proposal parsed; then: no error should be received
-
-+ scheduled talks have to fit in the time constraint of a session
- \--> test case to pass: given: 
-
-+ no demand for fixed order to schedule talks
- \--> test case to pass: given: 
-
-+ if the talk title includes numbers, I ignore the proposal and inform the user about the issue.
- \--> test case to pass: given: 
-
-+ no gap between session. I guess that means also no gap between talks
- \--> test case to pass: given: session; when: a talk ends and another is in the queue; then: start time of new talk should be equal to the end time of the previous talk
-
-+ even if the problem says that all proposal passed an initial screen process, the connection to an user interface a new proposal could come in a incorrect format so I should prevent a possible exception (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
- \--> test case to pass: given: proposal; when: proposal parsed; then: an error should be received
-
-++added assumptions/test cases for functionality:
-
-+ X. to sort the list of unplanned talks, talks have to be comparable
++ 12. to sort the list of unplanned talks, talks have to be comparable
  \--> test case to pass:
 		given: two talks with different duration; 
 		when: compared;
@@ -142,9 +114,175 @@ assumptions about the problem and the resulting test cases:
 		test method: testCompareTalks()
 		test class: TalkTest
 
++ 13. multiple tracks are possible
+ \--> test case 1 to pass: 
+		given: empty array of proposals; 
+		when: no talks to schedule; 
+		then: zero tracks should be received
+  	\--> test name: "test creating no track"; 
+		test method: testCreateNoTrack()
+		test class: ScheduleServiceTest
+ \--> test case 2 to pass: 
+		given: array of proposals that would fit in one track; 
+		when: talks do fit in one track; 
+		then: one track should be received
+  	\--> test name: "test creating one track"; 
+		test method: testCreateOneTrack()
+		test class: ScheduleServiceTest
+ \--> test case 3 to pass: 
+		given: array of proposals that would not fit in one track; 
+		when: talks do not fit in a single track; 
+		then: a second track should be created
+  	\--> test name: "test creating two tracks"; 
+		test method: testCreateTwoTracks()
+		test class: ScheduleServiceTest
+ \--> test case 4 to pass: 
+		given: array of proposals that would not fit in two tracks; 
+		when: talks do not fit in two tracks; 
+		then: a third track should be created
+  	\--> test name: "test creating three tracks"; 
+		test method: testCreateThreeTracks()
+		test class: ScheduleServiceTest
+
+
+
++ 14. a new talk is constructed with a proposal-string in the format:
+    "[characters without numbers][Free Space][Number]'min'" 
+    or 
+    "[characters without numbers][Free Space]'lightning'"
+ \--> test case 1 to pass: 
+		given: proposal in format "[characters without numbers][Free Space][Number]'min'" ; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test minute based input format of a proposal"; 
+		test method: testCheckFormatOfMinuteProposal()
+		test class: ScheduleServiceTest
+ \--> test case 2 to pass: 
+		given: proposal in format "[characters without numbers][Free Space]'lightning'" ; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test lightning based input format of a proposal"; 
+		test method: testCheckFormatOfLightningProposal()
+		test class: ScheduleServiceTest
+
++ 15. if the talk title includes numbers, I ignore the proposal and inform the user about the issue.
+ \--> test case to pass: 
+		given: proposal with number in talk title; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with number in talk title"; 
+		test method: testProposalWithNUmberInTalkTitle()
+		test class: ScheduleServiceTest
+		
+
++ 16. even if the problem says that all proposal passed an initial screen process: with the connection to an interactive user interface pops up the risk that a new proposal could come in an incorrect format so I should prevent possible exceptions (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
+ \--> test case to pass: 
+		given: proposal with empty lines; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test empty lines of proposals"; 
+		test method: testEmptyLinesOfProposals()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: empty proposal; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test empty proposals"; 
+		test method: testEmptyProposals()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal without talk title; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal without talk title"; 
+		test method: testProposalsWithoutTalkTitle()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal with incorrect duration; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with incorrect duration"; 
+		test method: testProposalsWithIncorrectDuration()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal with duration longer than the sessions; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with duration too long"; 
+		test method: testProposalsWithDurationTooLong()
+		test class: ScheduleServiceTest
+
++ 17. the user interface should show the name of the app in the main header
+ \--> test case to pass: 
+		given: main header;
+		when: user interface instantiated;
+		then: the header should be created with the name of the app
+  	\--> test name: "test app header"; 
+		test method: testAppHeader()
+		test class: MainViewTest
+
++ 18. the user interface should show the core function of the app in a second header
+ \--> test case to pass: 
+		given: second header;
+		when: user interface instantiated;
+		then: the second header should be created to show the purpose of the app
+  	\--> test name: "test purpose header"; 
+		test method: testPurposeHeader()
+		test class: MainViewTest
+
++ 19. the user interface should provide an area where the user could typ in his proposals
+ \--> test case to pass: 
+		given: text area;
+		when: user interface instantiated;
+		then: the text area should be ready for input
+  	\--> test name: "test input text area"; 
+		test method: testInputTextArea()
+		test class: MainViewTest
+
++ 20. the user interface should have an area to show the result of the schedulding process in the browser window
+ \--> test case to pass: 
+		given: a label and a span;
+		when: user interface instantiated;
+		then: the label and the span should be ready to receive text values
+  	\--> test name: "test label and span"; 
+		test method: testLabelAndSpan()
+		test class: MainViewTest
+
++ 21. the user interface should provide a button, that reads the input text area, calls the ScheduleService, print the results to the browser window and set up a notification when clicked
+ \--> test case to pass: 
+		given: the input area is empty;
+		when: button is clicked;
+		then: no schedule should be created, no record in the output span with a no-schedule-header in the output label and a notification with a zero-error-message
+  	\--> test name: "test button with zero errors"; 
+		test method: testButtonWithZeroErrors()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains a proposal with an error;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a one-error-message
+  	\--> test name: "test button with one error"; 
+		test method: testButtonWithOneError()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains multiple proposals with multiple errors;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a multiple-error-message
+  	\--> test name: "test button with multiple errors"; 
+		test method: testButtonWithMultipleErrors()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains one proposal;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a zero-error-message
+  	\--> test name: "test button with one proposal"; 
+		test method: testButtonWithOneProposal()
+		test class: MainViewTest
+
+
+
 -----------------------------------------------------------------------------------------
 
-assumptions about the implementation:
+hints about the implementation:
 
 + The task was to write a program that fits proposals into the time constraints of a day depending on the assumptions and test cases above.
 
@@ -161,10 +299,6 @@ assumptions about the implementation:
 + ScheduleService provides the method createSchedule(String[] proposals) which parses proposals to convert them into talks, counts errors that occur during parsing, schedules the talks on sessions which belong to tracks, and converts the created schedule into a String-Array to return it.
 
 + Through the String-Array based interface, the API of ScheduleService could also easily communicate with Json. And If there would be a need to connect a database, the classes of the object model could be simply modified to serve as entities for the database. But for now to keep everything appropriate and to implement only the given facts of the problem I tried to leave all unnecessary complexity behind.
-
------------------------------------------------------------------------------------------
-
-hints:
 
 + I commited every major step to show my development progress.
 --> First I set up the project with the spring initializr.

@@ -163,7 +163,7 @@ class SessionTest {
         Assertions.assertEquals("Writing Fast Tests Against Enterprise Rails",
                 afternoonSession.getScheduledTalks().get(0).getTitle());
         Assertions.assertEquals(60, afternoonSession.getScheduledTalks().get(0).getDuration());
-        Assertions.assertEquals(LocalTime.of(9,00), afternoonSession.getBlockedTimeOfDay().getFirst());
+        Assertions.assertEquals(LocalTime.of(13,00), afternoonSession.getBlockedTimeOfDay().getFirst());
 
         int sum = 0;
         // sum up all scheduled talk durations of the session
