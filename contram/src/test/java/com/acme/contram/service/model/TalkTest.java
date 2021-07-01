@@ -14,7 +14,7 @@ class TalkTest {
 
         // then: talk title and duration of the talk should be accessible
         Assertions.assertEquals("Rails Magic",talk.getTitle());
-        Assertions.assertEquals("60",talk.getDuration());
+        Assertions.assertEquals(60,talk.getDuration());
     }
 
     @Test

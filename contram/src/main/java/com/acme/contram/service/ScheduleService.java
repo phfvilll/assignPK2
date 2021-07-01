@@ -44,7 +44,6 @@ public class ScheduleService {
     private LinkedList<Talk> unplannedTalks;
     private LinkedList<Track> trackList;
     private LinkedList<String> outputList;
-    private LocalTime endTimeOfTrack;
 
     /**
      * Accepted input formats for the proposals in the parameter-String[] are:
@@ -85,7 +84,8 @@ public class ScheduleService {
         // create return parameter
         String[] schedule = new String[outputList.size()+1];
 
-        // attach the number of occured errors while parsing the incoming proposal-Array to the first field of the return parameter
+        // attach the number of occured errors while parsing the incoming proposal-Array to the first field of
+        // the return parameter
         schedule[0] = String.valueOf(errorCounter);
 
         // reference the objects of the output-list to the schedule-Array
@@ -136,7 +136,8 @@ public class ScheduleService {
             // catch other talks by checking the end of the proposal for duration
             String[] lastElement = proposalParts[proposalParts.length-1].split("min");
 
-            // check if the end of the proposal isn't followed by Characters and check if the duration is given as an Integer
+            // check if the end of the proposal isn't followed by Characters and check if the duration is given
+            // as an Integer
             if(lastElement.length==1 && StringUtils.isNumeric(lastElement[0])){
 
                 int duration = Integer.parseInt(lastElement[0]);
@@ -157,10 +158,6 @@ public class ScheduleService {
 
         trackList = new LinkedList<Track>();
 
-        // set the time for the Networking Event per default at 4PM and postpone it through the scheduling
-        // process up to 5PM to update all afternoon sessions when all talks are scheduled
-        endTimeOfTrack = LocalTime.of(16,00);
-
         // sort the list of unplanned talks from the longest to the shortest talk duration to be able to
         // schedule the longest talks first through a simple loop
         Collections.sort(unplannedTalks, Collections.reverseOrder());
@@ -178,14 +175,23 @@ public class ScheduleService {
             // fill up the afternoon session of the new track with talks
             assignTalksToSession(newTrack.getAfternoonSession());
 
-            // The closing event of the afternoon session is added at a later stage, when the earliest possible time of date is known
+            // The closing event of the afternoon session is added at a later stage, when the earliest possible
+            // time of date is known
 
             trackList.add(newTrack);
         }
 
-        // The earliest possible time of date for the last Event of the afternoon is now known and can be added to the afternoon sessions of every track
+        // The earliest possible time of date for the last Event of the afternoon is now known and can be added
+        // to the afternoon sessions of every track
+        LocalTime finalLastEventTime = LocalTime.of(16,00);
+        for(int i = 0; i < trackList.size();i++){
+            // update the earliest possible time of date for the last Event of the afternoon session
+            if(trackList.get(i).getAfternoonSession().getClockHand().isAfter(finalLastEventTime)){
+                finalLastEventTime = trackList.get(i).getAfternoonSession().getClockHand();
+            }
+        }
         for(int i = 0; i < trackList.size(); i++){
-            trackList.get(i).getAfternoonSession().setLastEventTime(endTimeOfTrack);
+            trackList.get(i).getAfternoonSession().setLastEventTime(finalLastEventTime);
             addLastEvent(trackList.get(i).getAfternoonSession());
         }
     }
@@ -201,23 +207,10 @@ public class ScheduleService {
             Talk currentTalk = unplannedTalks.get(i);
 
             // schedule a talk if enough time is available to fit it into the session
-            if(currentTalk.getDuration()<=session.getTimeLeft()){
-
-                // the talk fits in, so assign it to the session
-                session.getScheduledTalks().add(currentTalk);
-                session.getBlockedTimeOfDay().add(currentTime);
-
-                // reducing the time which left to the session by the duration of the new
-                // scheduled talk
-                session.setTimeLeft(session.getTimeLeft()-currentTalk.getDuration());
+            if(session.addTalk(currentTalk)){
 
                 // update the point of time by the duration of the new scheduled talk
                 currentTime = currentTime.plusMinutes(currentTalk.getDuration());
-
-                // update the earliest possible time of date for the last Event of the afternoon session
-                if(currentTime.isAfter(endTimeOfTrack)){
-                    endTimeOfTrack = currentTime;
-                }
 
                 // remove scheduled talk from the list for unplanned talks
                 unplannedTalks.remove(i);
@@ -230,7 +223,8 @@ public class ScheduleService {
     }
 
     private void addLastEvent(Session session){
-        // add the closing event of a session to the records with a duration of 0 to identify it later in the getOutputList()-method
+        // add the closing event of a session to the records with a duration of 0 to identify it later in the
+        // getOutputList()-method
         session.getScheduledTalks().add(new Talk(session.getLastEventTitle(),0));
         session.getBlockedTimeOfDay().add(session.getLastEventTime());
     }

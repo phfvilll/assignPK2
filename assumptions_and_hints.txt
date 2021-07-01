@@ -9,7 +9,7 @@ Assumptions and Hints
 
 assumptions about the problem and the resulting test cases:
 
-+ convert proposals to a schedule
++ 1. convert proposals to a schedule
  \--> test case to pass: 
 		given: array of proposal-lines; 
 		when: scheduling completed (used method should schedule the talks with the longest duration first); 
@@ -18,7 +18,7 @@ assumptions about the problem and the resulting test cases:
 		test method: testCreateSchedule()
 		test class: ScheduleServiceTest
 
-+ a talk consists of a talk title and a duration
++ 2. a talk consists of a talk title and a duration
  \--> test case to pass: 
 		given: talk; 
 		when: initialized; 
@@ -27,7 +27,76 @@ assumptions about the problem and the resulting test cases:
 		test method: testGettingTitleAndDuration()
 		test class: TalkTest
 
-+ a track consists of a morning session and an afternoon session.
++ 3. a morning session starts at 9AM
+ \--> test case to pass: 
+		given: a morning session; 
+		when: initialized; 
+		then: start time of session should be 9AM
+  	\--> test name: "test start time of morning session"; 
+		test method: testStartTimeOfMorningSession()
+		test class: SessionTest
+
++ 4. a morning session lasts 3 hours
+ \--> test case to pass:  
+		given: a morning session;  
+		when: initialized;  
+		then: time left to schedule of session should be 3 hours(180 minutes)
+  	\--> test name: "test time left of morning session"; 
+		test method: testTimeLeftOfMorningSession()
+		test class: SessionTest
+
++ 5. a morning session ends with lunch at 12PM
+ \--> test case to pass: 
+		given: a morning session; 
+		when: initialized; 
+		then: last event time of session should be 12PM and last event title should be lunch
+  	\--> test name: "test last event of morning session"; 
+		test method: testLastEventOfMorningSession()
+		test class: SessionTest
+
++ 6. a morning session contains as many talk as the time constraint fits
+ \--> test case to pass: 
+		given: list of talks; 
+		when: talks scheduled to morning session until no time left; 
+		then: sum of talk durations should be less than 3 hours
+  	\--> test name: "test time constraint of morning session"; 
+		test method: testTimeConstraintOfMorningSession()
+		test class: SessionTest
+
++ 7. an afternoon session starts at 1PM
+ \--> test case to pass: 
+		given: an afternoon session; 
+		when: initialized; 
+		then: start time of session should be 1PM
+  	\--> test name: "test start time of afternoon session"; 
+		test method: testStartTimeOfAfternoonSession()
+		test class: SessionTest
+
++ 8. an afternoon session lasts max. 4 hours
+ \--> test case to pass: 
+		given: an afternoon session; 
+		when: initialized; 
+		then: time left to schedule should be 4 hours(240 minutes)
+  	\--> test name: "test time left of afternoon session"; 
+		test method: testTimeLeftOfAfternoonSession()
+		test class: SessionTest
+
++ 9. an afternoon session ends with a Networking Event, earliest time at 4PM, latest time at 5PM
+ \--> test case to pass: 
+		given: list of talks; 
+		when: all talks are scheduled; 
+		then: the time of the last event should be the same in all afternoon sessions between 4PM and 5PM.
+  	\--> test name: "test last event of afternoon session"; 
+		test method: testLastEventOfAfternoonSession()
+		test class: SessionTest
+
++ 10. an afternoon session contains as many talk as the time constraint fits
+ \--> test case to pass: 
+		given: list of talks; 
+		when: talks scheduled to afternoon session until no time left; 
+		then: sum of talk durations should be less than 4 hours
+
++ 11. a track consists of a morning session and an afternoon session.
  \--> test case to pass:
 		given: track;
 		when: initialized;
@@ -35,6 +104,8 @@ assumptions about the problem and the resulting test cases:
   	\--> test name: "test getting the morning session and the afternoon session of a track"; 
 		test method: testGetSessions()
 		test class: TrackTest
+
+
 
 + multiple tracks are possible
  \--> test case to pass: given: list of talks; when: talks do not fit in one track; then: a new track should be created
@@ -44,31 +115,6 @@ assumptions about the problem and the resulting test cases:
     or 
     "[characters without numbers][Free Space]'lightning'"
  \--> test case to pass: given: proposal; when: proposal parsed; then: no error should be received
-
-
-+ a morning session starts at 9AM
- \--> test case to pass: given: a morning session; when: initialized; then: start time of session should be 9AM
-
-+ a morning session lasts 3 hours
- \--> test case to pass: given: a morning session; when: initialized; then: time left to schedule of session should be 3 hours(180 minutes)
-
-+ a morning session ends with lunch at 12PM
- \--> test case to pass: given: a morning session; when: initialized; then: last event time of session should be 12PM and last event title should be lunch
-
-+ a morning session contains as many talk as the time constraint fits
- \--> test case to pass: given: list of talks; when: talks scheduled to morning session until no time left; then: sum of talk durations should be less than 3 hours
-
-+ an afternoon session starts at 1PM
- \--> test case to pass: given: an afternoon session; when: initialized; then: start time of session should be 1PM
-
-+ an afternoon session lasts max. 4 hours
- \--> test case to pass: given: an afternoon session; when: initialized; then: time left to schedule should be 4 hours(240 minutes)
-
-+ an afternoon session contains as many talk as the time constraint fits
- \--> test case to pass: given: list of talks; when: talks scheduled to afternoon session until no time left; then: sum of talk durations should be less than 4 hours
-
-+ an afternoon session ends with a Networking Event, earliest time at 4PM, latest time at 5PM, depending on the latest talkend of all tracks
- \--> test case to pass: given: list of tracks; when: when all; then: the time of the last event should be the same in all afternoon sessions between 4PM and 5PM.
 
 + scheduled talks have to fit in the time constraint of a session
  \--> test case to pass: given: 
@@ -85,7 +131,16 @@ assumptions about the problem and the resulting test cases:
 + even if the problem says that all proposal passed an initial screen process, the connection to an user interface a new proposal could come in a incorrect format so I should prevent a possible exception (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
  \--> test case to pass: given: proposal; when: proposal parsed; then: an error should be received
 
-++added assumptions/test cases for 100% code coverage:
+++added assumptions/test cases for functionality:
+
++ X. to sort the list of unplanned talks, talks have to be comparable
+ \--> test case to pass:
+		given: two talks with different duration; 
+		when: compared;
+		then: one talk have to be shorter than the other
+  	\--> test name: "test compare duration of two talks"; 
+		test method: testCompareTalks()
+		test class: TalkTest
 
 -----------------------------------------------------------------------------------------
 

@@ -8,7 +8,7 @@ class ScheduleServiceTest {
 
     @BeforeEach
     void setUp() {
-        scheduleService = new ScheduleService();
+        this.scheduleService = new ScheduleService();
     }
 
     @Test

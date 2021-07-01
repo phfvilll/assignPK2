@@ -20,6 +20,7 @@ public class Session {
     private LocalTime startTime;
     private LocalTime lastEventTime;
     private String lastEventTitle;
+    private LocalTime clockHand;
 
     /**
      * The constructor instantiate a session by initializing a list of talks and a list of their blocked time
@@ -38,8 +39,47 @@ public class Session {
         this.blockedTimeOfDay = new LinkedList<LocalTime>();
         this.timeLeft = timeLeft;
         this.startTime = startTime;
+        this.clockHand = startTime;
         this.lastEventTime = lastEventTime;
         this.lastEventTitle = lastEventTitle;
+    }
+
+    /**
+     * Schedule a talk if enough time is available to fit it into the session.
+     * if the talk fits, then assign it to the session together with the time
+     * of date and reducing the time which left to the session by the duration
+     * of the new scheduled talk.
+     * @param talk
+     * @return true if the talk was added and false if there is not enough time
+     * to fit the talk into the session.
+     */
+    public boolean addTalk(Talk talk){
+
+        // schedule a talk if enough time is available to fit it into the session
+        if(talk.getDuration()<=this.timeLeft) {
+
+            // the talk fits in, so assign it to the session
+            this.scheduledTalks.add(talk);
+            this.blockedTimeOfDay.add(clockHand);
+
+            // block the time for the new talk
+            clockHand = clockHand.plusMinutes(talk.getDuration());
+
+            // postpone the last event of the afternoon session up to 5PM
+            if(clockHand.isAfter(LocalTime.of(16,00))){
+                this.lastEventTime = clockHand;
+            }
+
+            // reducing the time which left to the session by the duration of the new
+            // scheduled talk
+            this.timeLeft -= talk.getDuration();
+
+            return true;
+
+        } else {
+
+            return false;
+        }
     }
 
     /**
@@ -60,21 +100,14 @@ public class Session {
     }
 
     /**
-     * Update the amount of time that is left to fit talks into the session.
-     * @param timeLeft
-     */
-    public void setTimeLeft(int timeLeft) {
-        // avoid negative time values
-        if(timeLeft < 0){
-            this.timeLeft = 0;
-        }
-        this.timeLeft = timeLeft;
-    }
-
-    /**
      * {@return the time of date when the session begins.}
      */
     public LocalTime getStartTime() { return startTime; }
+
+    /**
+     * {@return the next possible time of date for the next talk or event.}
+     */
+    public LocalTime getClockHand() { return clockHand; }
 
     /**
      * @return the time of date when the session is over and the last event begins.}
