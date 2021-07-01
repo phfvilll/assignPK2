@@ -1,0 +1,12 @@
+assumptions:
+-like in the test output i prefer to schedule the network event at 5pm for simplicity, too.
+
+hints:
+- the app is developed in Java (version 11) with the Apache licensed framework Vaadin (version 14.6.4) based on Spring Boot (version 2.5.2) and Maven (version 4.0.0)
+- to develop the app I used IntelliJ as IDE
+- commit 1: set up the project folder created by the spring initializr
+
+requirements:
+
+------------------------------------------------------------------------------------------------
+Unit testing is about testing the public states, behaviors, and interactions of your objects.

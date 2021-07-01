@@ -1,0 +1,320 @@
+
+CodeAssignment: CONFERENCE TRACK MANAGEMENT
+
+Assumptions and Hints
+
+@author: Philipp Kraatz
+
+-----------------------------------------------------------------------------------------
+
+assumptions about the problem and the resulting test cases:
+
++ 1. convert proposals to a schedule
+ \--> test case to pass: 
+		given: array of proposal-lines; 
+		when: scheduling completed (used method should schedule the talks with the longest duration first); 
+		then: array of schedule-lines is received in sequence of used method (longest talks first)
+  	\--> test name: "test converting proposals to a schedule"; 
+		test method: testCreateSchedule()
+		test class: ScheduleServiceTest
+
++ 2. a talk consists of a talk title and a duration
+ \--> test case to pass: 
+		given: talk; 
+		when: initialized; 
+		then: talk title and duration of the talk should be accessible
+  	\--> test name: "test getting talk title and duration from a title"; 
+		test method: testGettingTitleAndDuration()
+		test class: TalkTest
+
++ 3. a morning session starts at 9AM
+ \--> test case to pass: 
+		given: a morning session; 
+		when: initialized; 
+		then: start time of session should be 9AM
+  	\--> test name: "test start time of morning session"; 
+		test method: testStartTimeOfMorningSession()
+		test class: SessionTest
+
++ 4. a morning session lasts 3 hours
+ \--> test case to pass:  
+		given: a morning session;  
+		when: initialized;  
+		then: time left to schedule of session should be 3 hours(180 minutes)
+  	\--> test name: "test time left of morning session"; 
+		test method: testTimeLeftOfMorningSession()
+		test class: SessionTest
+
++ 5. a morning session ends with lunch at 12PM
+ \--> test case to pass: 
+		given: a morning session; 
+		when: initialized; 
+		then: last event time of session should be 12PM and last event title should be lunch
+  	\--> test name: "test last event of morning session"; 
+		test method: testLastEventOfMorningSession()
+		test class: SessionTest
+
++ 6. a morning session contains as many talk as the time constraint fits
+ \--> test case to pass: 
+		given: list of talks; 
+		when: talks scheduled to morning session until no time left; 
+		then: sum of talk durations should be less than 3 hours
+  	\--> test name: "test time constraint of morning session"; 
+		test method: testTimeConstraintOfMorningSession()
+		test class: SessionTest
+
++ 7. an afternoon session starts at 1PM
+ \--> test case to pass: 
+		given: an afternoon session; 
+		when: initialized; 
+		then: start time of session should be 1PM
+  	\--> test name: "test start time of afternoon session"; 
+		test method: testStartTimeOfAfternoonSession()
+		test class: SessionTest
+
++ 8. an afternoon session lasts max. 4 hours
+ \--> test case to pass: 
+		given: an afternoon session; 
+		when: initialized; 
+		then: time left to schedule should be 4 hours(240 minutes)
+  	\--> test name: "test time left of afternoon session"; 
+		test method: testTimeLeftOfAfternoonSession()
+		test class: SessionTest
+
++ 9. an afternoon session ends with a Networking Event, earliest time at 4PM, latest time at 5PM
+ \--> test case to pass: 
+		given: list of talks; 
+		when: all talks are scheduled; 
+		then: the time of the last event should be the same in all afternoon sessions between 4PM and 5PM.
+  	\--> test name: "test last event of afternoon session"; 
+		test method: testLastEventOfAfternoonSession()
+		test class: SessionTest
+
++ 10. an afternoon session contains as many talk as the time constraint fits
+ \--> test case to pass: 
+		given: list of talks; 
+		when: talks scheduled to afternoon session until no time left; 
+		then: sum of talk durations should be less than 4 hours
+
++ 11. a track consists of a morning session and an afternoon session.
+ \--> test case to pass:
+		given: track;
+		when: initialized;
+		then: morning session and afternoon session of the track should be accessible
+  	\--> test name: "test getting the morning session and the afternoon session of a track"; 
+		test method: testGetSessions()
+		test class: TrackTest
+
++ 12. to sort the list of unplanned talks, talks have to be comparable
+ \--> test case to pass:
+		given: two talks with different duration; 
+		when: compared;
+		then: one talk have to be shorter than the other
+  	\--> test name: "test compare duration of two talks"; 
+		test method: testCompareTalks()
+		test class: TalkTest
+
++ 13. multiple tracks are possible
+ \--> test case 1 to pass: 
+		given: empty array of proposals; 
+		when: no talks to schedule; 
+		then: zero tracks should be received
+  	\--> test name: "test creating no track"; 
+		test method: testCreateNoTrack()
+		test class: ScheduleServiceTest
+ \--> test case 2 to pass: 
+		given: array of proposals that would fit in one track; 
+		when: talks do fit in one track; 
+		then: one track should be received
+  	\--> test name: "test creating one track"; 
+		test method: testCreateOneTrack()
+		test class: ScheduleServiceTest
+ \--> test case 3 to pass: 
+		given: array of proposals that would not fit in one track; 
+		when: talks do not fit in a single track; 
+		then: a second track should be created
+  	\--> test name: "test creating two tracks"; 
+		test method: testCreateTwoTracks()
+		test class: ScheduleServiceTest
+ \--> test case 4 to pass: 
+		given: array of proposals that would not fit in two tracks; 
+		when: talks do not fit in two tracks; 
+		then: a third track should be created
+  	\--> test name: "test creating three tracks"; 
+		test method: testCreateThreeTracks()
+		test class: ScheduleServiceTest
+
+
+
++ 14. a new talk is constructed with a proposal-string in the format:
+    "[characters without numbers][Free Space][Number]'min'" 
+    or 
+    "[characters without numbers][Free Space]'lightning'"
+ \--> test case 1 to pass: 
+		given: proposal in format "[characters without numbers][Free Space][Number]'min'" ; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test minute based input format of a proposal"; 
+		test method: testCheckFormatOfMinuteProposal()
+		test class: ScheduleServiceTest
+ \--> test case 2 to pass: 
+		given: proposal in format "[characters without numbers][Free Space]'lightning'" ; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test lightning based input format of a proposal"; 
+		test method: testCheckFormatOfLightningProposal()
+		test class: ScheduleServiceTest
+
++ 15. if the talk title includes numbers, I ignore the proposal and inform the user about the issue.
+ \--> test case to pass: 
+		given: proposal with number in talk title; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with number in talk title"; 
+		test method: testProposalWithNUmberInTalkTitle()
+		test class: ScheduleServiceTest
+		
+
++ 16. even if the problem says that all proposal passed an initial screen process: with the connection to an interactive user interface pops up the risk that a new proposal could come in an incorrect format so I should prevent possible exceptions (I will ignore incorrect formatted proposals for planning, but inform the user about the issue)
+ \--> test case to pass: 
+		given: proposal with empty lines; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test empty lines of proposals"; 
+		test method: testEmptyLinesOfProposals()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: empty proposal; 
+		when: proposal parsed; 
+		then: zero errors should be returned
+  	\--> test name: "test empty proposals"; 
+		test method: testEmptyProposals()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal without talk title; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal without talk title"; 
+		test method: testProposalsWithoutTalkTitle()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal with incorrect duration; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with incorrect duration"; 
+		test method: testProposalsWithIncorrectDuration()
+		test class: ScheduleServiceTest
+ \--> test case to pass: 
+		given: proposal with duration longer than the sessions; 
+		when: proposal parsed; 
+		then: An error should be returned
+  	\--> test name: "test proposal with duration too long"; 
+		test method: testProposalsWithDurationTooLong()
+		test class: ScheduleServiceTest
+
++ 17. the user interface should show the name of the app in the main header
+ \--> test case to pass: 
+		given: main header;
+		when: user interface instantiated;
+		then: the header should be created with the name of the app
+  	\--> test name: "test app header"; 
+		test method: testAppHeader()
+		test class: MainViewTest
+
++ 18. the user interface should show the core function of the app in a second header
+ \--> test case to pass: 
+		given: second header;
+		when: user interface instantiated;
+		then: the second header should be created to show the purpose of the app
+  	\--> test name: "test purpose header"; 
+		test method: testPurposeHeader()
+		test class: MainViewTest
+
++ 19. the user interface should provide an area where the user could typ in his proposals
+ \--> test case to pass: 
+		given: text area;
+		when: user interface instantiated;
+		then: the text area should be ready for input
+  	\--> test name: "test input text area"; 
+		test method: testInputTextArea()
+		test class: MainViewTest
+
++ 20. the user interface should have an area to show the result of the schedulding process in the browser window
+ \--> test case to pass: 
+		given: a label and a span;
+		when: user interface instantiated;
+		then: the label and the span should be ready to receive text values
+  	\--> test name: "test label and span"; 
+		test method: testLabelAndSpan()
+		test class: MainViewTest
+
++ 21. the user interface should provide a button, that reads the input text area, calls the ScheduleService, print the results to the browser window and set up a notification when clicked
+ \--> test case to pass: 
+		given: the input area is empty;
+		when: button is clicked;
+		then: no schedule should be created, no record in the output span with a no-schedule-header in the output label and a notification with a zero-error-message
+  	\--> test name: "test button with zero errors"; 
+		test method: testButtonWithZeroErrors()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains a proposal with an error;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a one-error-message
+  	\--> test name: "test button with one error"; 
+		test method: testButtonWithOneError()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains multiple proposals with multiple errors;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a multiple-error-message
+  	\--> test name: "test button with multiple errors"; 
+		test method: testButtonWithMultipleErrors()
+		test class: MainViewTest
+ \--> test case to pass: 
+		given: the input area contains one proposal;
+		when: button is clicked;
+		then: a schedule should be created that is recorded in the output span with a schedule-header in the output label and a notification with a zero-error-message
+  	\--> test name: "test button with one proposal"; 
+		test method: testButtonWithOneProposal()
+		test class: MainViewTest
+
+
+
+-----------------------------------------------------------------------------------------
+
+hints about the implementation:
+
++ The task was to write a program that fits proposals into the time constraints of a day depending on the assumptions and test cases above.
+
++ I decided to write the program as a web application in Java (version 11) with the framework Vaadin (version 14.6.4) based on Spring Boot (version 2.5.2) and Maven (version 4.0.0).
+
++ In case of testing I used Junit Jupiter (version 5.7.2) whose dependency comes with the spring-boot-starter-test-dependency. 
+
++ In order to avoid overengineering, there is no database, because it is not necessary at all. As the task demands only to schedule a given input of proposals(not to safe them or handle them by a special service), I tried to keep the solution as simple as possible.
+
++ Therefore I implemented only 5 classes (besides the main-class to run the app). One class for the scheduling service, 3 classes for my object model consisting of tracks, sessions, talks and one class for the user interface.
+
++ The class MainView is mapped to the context root of the running application, so it is instantiated when the user connect to the host server in the browser. MainView builds up the user interface and a button-click-listener implements the API of the ScheduleService-Class which is initialized by dependency injection. 
+
++ ScheduleService provides the method createSchedule(String[] proposals) which parses proposals to convert them into talks, counts errors that occur during parsing, schedules the talks on sessions which belong to tracks, and converts the created schedule into a String-Array to return it.
+
++ Through the String-Array based interface, the API of ScheduleService could also easily communicate with Json. And If there would be a need to connect a database, the classes of the object model could be simply modified to serve as entities for the database. But for now to keep everything appropriate and to implement only the given facts of the problem I tried to leave all unnecessary complexity behind.
+
++ I commited every major step to show my development progress.
+--> First I set up the project with the spring initializr.
+--> Then I created the MainView-class in the userinterface-package and implemented the user interface including unit testing.
+--> After that I implemented my object model that consists of the Track-, Session-, TalkRecord- and Talk-class in the service.model-package including unit testing.
+--> Now I could implement the ScheduleService in three major steps in the service-package. The first step was to parse the incoming String-Array to list them as talks and count the errors that occur while doing so including unit testing.
+--> The second step was to schedule the list of unplanned talks to a list of tracks including unit testing.
+--> The third step was to convert the schedule(list of tracks) to a printable list of Strings and assign it together with the counted errors to a return value as a String-Array including unit testing.
+--> Then I added a click-listener to the UI's schedule button and implemented the API in it including unit testing.
+--> After that I could make the integration test with the maven-failsafe-plugin.
+--> Last but not Least I added this textfile to the project.
+
++ I used IntelliJ IDEA 2021.1.3 (Ultimate Edition) to build the app.
+
++ the node_modules and target-folder are not uploaded to the repository. So the project has to be rebuild including a npm install (node required as well as a JDK and maven) before it is runnable.
+
++ The Spring Boot Application runs on a local Apache Tomcat Test-Server on port 8080. So it is accessible in the browser on: localhost:8080
+
+-----------------------------------------------------------------------------------------
